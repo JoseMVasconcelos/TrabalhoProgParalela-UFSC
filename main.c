@@ -30,6 +30,7 @@ void startDict() {
 
 //Função para criar um novo dado sensorial
 void createSensorialData() {
+    //SEMAFORO AQUI
     //Intervalo para conseguir um novo dado sensorial entre 1 a 5 segundos
     sleep((rand() % 5) + 1);
 }
