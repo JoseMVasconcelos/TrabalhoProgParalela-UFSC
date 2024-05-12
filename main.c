@@ -18,7 +18,6 @@ pthread_t sensorsThread[NUM_SENSORS];
 pthread_t controlCenterThread;
 int sensorialData[NUM_SENSORS];
 int sensorsId[NUM_SENSORS];
-
 int sensorialDataIn, sensorialDataOut = 0;
 int actuatorsValue[NUM_ACTUATORS] = {0};
 
@@ -31,12 +30,12 @@ int processStatus;
 //Função para criar um novo dado sensorial
 void *createSensorialData(void *arg) {
     int thread_num = *((int *) arg);
-    while(TRUE) {
+    while (TRUE) {
         sem_wait(&sensorialDataBufferEmpty);
         pthread_mutex_lock(&createSensorialDataMutex);
         srand(time(NULL));
         //Intervalo para conseguir um novo dado sensorial entre 1 a 5 segundos
-        sensorialData[sensorialDataIn] = (rand()%1000 + 1);
+        sensorialData[sensorialDataIn] = (rand() % 1000 + 1);
         sensorialDataIn = (sensorialDataIn + 1) % NUM_SENSORS;
         sleep((rand() % 5) + 1);
         pthread_mutex_unlock(&createSensorialDataMutex);
@@ -53,7 +52,7 @@ int readSensorialData() {
 }
 
 void *controlCenter() {
-    while(TRUE) {
+    while (TRUE) {
         #pragma omp parallel
         {
             pthread_mutex_lock(&readSensorialDataMutex);
@@ -116,17 +115,17 @@ int main() {
         pthread_mutex_init(&actuatorsMutex[i], NULL);
     }
 
-    for(int i = 0; i < NUM_SENSORS; i++) {
+    for (int i = 0; i < NUM_SENSORS; i++) {
         sensorsId[i] = i;
         pthread_create(&sensorsThread[i], NULL, createSensorialData, &sensorsId[i]);
     }
 
     pthread_create(&controlCenterThread, NULL, controlCenter, NULL);
 
-    for(int i = 0; i < NUM_SENSORS; i++) {
+    for (int i = 0; i < NUM_SENSORS; i++) {
         pthread_join(sensorsThread[i], NULL);
     }
-
+    
     //Destruição dos semáforos e mutexes
     sem_destroy(&sensorialDataBufferEmpty);
     sem_destroy(&sensorialDataBufferFull);
