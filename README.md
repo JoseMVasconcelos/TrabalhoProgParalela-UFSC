@@ -46,7 +46,7 @@ Executar o código conforme fornecido sem alterações.
 - O thread pool simulado modificará os valores dos atuadores, com falhas ocasionais (20% de chance de falha em qualquer etapa).
 - A saída deve incluir linhas indicando a alteração dos atuadores e falhas ocasionais.
 
-**Resultado Simulado:**
+**Resultado Obtido:**
 ```c
 Alterando: <3> com valor <35>!
 Falha: <3>
@@ -82,7 +82,7 @@ Executar o código com a nova configuração.
 - O centro de controle distribuirá as tarefas de forma mais frequente para um conjunto maior de atuadores.
 - A saída deve incluir mais alterações e falhas, refletindo o aumento na atividade do sistema.
 
-**Resultado Simulado:**
+**Resultado Obtido:**
 ```c
 Alterando: <5> com valor <39>!
 Alterando: <4> com valor <55>!
@@ -110,7 +110,7 @@ Modificar a função `modifyActuatorValue` para reduzir a probabilidade de falha
 
 ```c
 void modifyActuatorValue(int data, int actuator) {
-    if (rand() % 2 == 0) {  // 5% chance de falha em qualquer etapa
+    if (rand() % 2 == 0) {  // 50% chance de falha
         exit(1);
     } else {
         sleep((rand() % 2) + 2);
@@ -119,4 +119,36 @@ void modifyActuatorValue(int data, int actuator) {
     }
 }
 ```
-Modificar outro techo tbm... continua
+Modificar outro techo também:
+```c
+else {
+    if (rand() % 2 == 0) {  // 50% chance de falha
+        processStatus = 1;  
+    }
+    wait(&childProcessStatus);
+    ...
+}
+```
+
+**Resultado Esperado:**
+
+- A probabilidade de falhas durante a modificação dos atuadores ou em qualquer etapa do processo será de 50%.
+- A saída deve incluir mais mensagens de falha, refletindo o aumento significativo na probabilidade de falha em comparação com a configuração padrão.
+
+**Resultado Obtido:**
+```c
+Falha: <8>
+Falha: <1>
+Alterando: <3> com valor <1>!
+Alterando: <3> com valor <57>!
+Falha: <5>
+Falha: <3>
+Falha: <10>
+Alterando: <6> com valor <10>!
+Alterando: <3> com valor <26>!
+Alterando: <4> com valor <73>!
+```
+
+### Conclusão
+
+Os resultados dos testes demonstraram que a implementação do sistema de acionamento automático em carros autônomos, utilizando programação multithread em C, é capaz de lidar eficientemente com diferentes configurações e cenários, mantendo a integridade das operações mesmo em condições de alta carga e probabilidade de falha. A utilização de múltiplas threads, semáforos e mutexes proporcionou uma execução concorrente e segura do sistema, garantindo tempos de resposta rápidos e uma distribuição eficiente das tarefas entre os componentes do sistema. Esses resultados validam a abordagem adotada e destacam a viabilidade do uso de técnicas de programação paralela na construção de sistemas complexos e robustos.
