@@ -26,7 +26,7 @@ int buffer[BUFFER_SIZE];
 int buffer_count = 0;
 
 //Declaração de semáforos e mutexes
-sem_t sensorialDataBufferEmpty, sensorialDataBufferFull;
+sem_t sensorialDataBufferEmpty, sensorialDataBufferFull, activityBuffer;
 pthread_mutex_t createSensorialDataMutex, writeOnScreenMutex, readSensorialDataMutex, bufferMutex;
 pthread_mutex_t actuatorsMutex[NUM_ACTUATORS];
 
@@ -62,14 +62,11 @@ int readSensorialData() {
 }
 
 void *simulatedThreadPool() {
-    while (TRUE) {
     #pragma omp parallel
         {
-            pthread_mutex_lock(&bufferMutex);
-            if (buffer_count == 0) { 
-                pthread_mutex_unlock(&bufferMutex);
-            } 
-            else {
+            while (TRUE) {
+                sem_wait(&activityBuffer);
+                pthread_mutex_lock(&bufferMutex);
                 buffer_count--;
                 int actuator = buffer[buffer_count];
                 pthread_mutex_lock(&actuatorsMutex[actuator]);
@@ -101,7 +98,6 @@ void *simulatedThreadPool() {
                 pthread_mutex_unlock(&actuatorsMutex[actuator]);
             }
         }
-    }
 }
 
 void *controlCenter() {
@@ -116,6 +112,7 @@ void *controlCenter() {
         buffer_count++;
         // printf("buffer count: %d\n", buffer_count);
         pthread_mutex_unlock(&bufferMutex);
+        sem_post(&activityBuffer);
     }
 }
 
@@ -140,6 +137,7 @@ int main() {
     //Inicialização dos semáforos e mutexes
     sem_init(&sensorialDataBufferEmpty, 0, NUM_SENSORS); //Semáforo para produção
     sem_init(&sensorialDataBufferFull, 0, 0); //Semáforo para consumo
+    sem_init(&activityBuffer, 0, 0); //Semáforo para simular threadpool
     pthread_mutex_init(&createSensorialDataMutex, NULL);
     pthread_mutex_init(&writeOnScreenMutex, NULL);
     pthread_mutex_init(&readSensorialDataMutex, NULL);
@@ -162,6 +160,7 @@ int main() {
     //Destruição dos semáforos e mutexes
     sem_destroy(&sensorialDataBufferEmpty);
     sem_destroy(&sensorialDataBufferFull);
+    sem_destroy(&activityBuffer);
     pthread_mutex_destroy(&createSensorialDataMutex);
     pthread_mutex_destroy(&writeOnScreenMutex);
     pthread_mutex_destroy(&readSensorialDataMutex);
