@@ -28,4 +28,95 @@ Para compilar o código, utilize o seguinte comando:
 gcc new_main.c -o main -pthread -fopenmp
 ```
 
-### Resultados
+### Casos de Teste e Resultados Esperados
+
+#### Caso de Teste 1: Configuração Padrão
+
+**Configuração:**
+- Número de sensores: 4
+- Número de atuadores: 4
+- Probabilidade de falha ao modificar um atuador ou durante o processo: 20%
+
+**Execução:**
+Executar o código conforme fornecido sem alterações.
+
+**Resultado Esperado:**
+- Sensores gerarão dados sensoriais periodicamente.
+- O centro de controle lerá os dados dos sensores e distribuirá tarefas para os atuadores.
+- O thread pool simulado modificará os valores dos atuadores, com falhas ocasionais (20% de chance de falha em qualquer etapa).
+- A saída deve incluir linhas indicando a alteração dos atuadores e falhas ocasionais.
+
+**Resultado Simulado:**
+```c
+Alterando: <3> com valor <35>!
+Falha: <3>
+Falha: <4>
+Alterando: <4> com valor <37>!
+Alterando: <1> com valor <63>!
+Alterando: <3> com valor <96>!
+Alterando: <2> com valor <15>!
+Alterando: <4> com valor <34>!
+Falha: <3>
+Alterando: <3> com valor <72>!
+```
+---
+
+#### Caso de Teste 2: Aumentar o Número de Sensores e Atuadores Mantendo a Falha de 20%
+
+**Configuração:**
+- Número de sensores: 10
+- Número de atuadores: 10
+
+**Modificação no Código:**
+```c
+#define NUM_SENSORS 10
+#define NUM_ACTUATORS 10
+```
+### Execução:
+
+Executar o código com a nova configuração.
+
+**Resultado Esperado:**
+
+- Sensores adicionais gerarão mais dados sensoriais.
+- O centro de controle distribuirá as tarefas de forma mais frequente para um conjunto maior de atuadores.
+- A saída deve incluir mais alterações e falhas, refletindo o aumento na atividade do sistema.
+
+**Resultado Simulado:**
+```c
+Alterando: <5> com valor <39>!
+Alterando: <4> com valor <55>!
+Alterando: <7> com valor <39>!
+Alterando: <5> com valor <22>!
+Falha: <9>
+Alterando: <6> com valor <31>!
+Alterando: <2> com valor <88>!
+Falha: <10>
+Alterando: <5> com valor <73>!
+Alterando: <6> com valor <38>!
+```
+
+---
+
+#### Caso de Teste 3: Aumentando a probabilidade de falha
+
+**Configuração:**
+
+- Probabilidade de falha ao modificar um atuador ou durante o processo: 50%
+
+**Modificação no Código:**
+
+Modificar a função `modifyActuatorValue` para reduzir a probabilidade de falha:
+
+```c
+void modifyActuatorValue(int data, int actuator) {
+    if (rand() % 2 == 0) {  // 5% chance de falha em qualquer etapa
+        exit(1);
+    } else {
+        sleep((rand() % 2) + 2);
+        actuatorsValue[actuator] = data;
+        exit(0);
+    }
+}
+```
+Modificar outro techo tbm... continua
