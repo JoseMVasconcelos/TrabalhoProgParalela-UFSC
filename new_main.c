@@ -103,16 +103,20 @@ void *simulatedThreadPool() {
 void *controlCenter() {
     pthread_create(&simulatedThreadPoolThread, NULL, simulatedThreadPool, NULL);
     while (TRUE) {
-        int data = readSensorialData();
-        int actuator = data % NUM_ACTUATORS;
-        // printf("actuator: %d\n", actuator);
-        pthread_mutex_lock(&bufferMutex);
-        buffer[buffer_count] = actuator;
-        // printf("actuator in array: %d\n", buffer[buffer_count]);
-        buffer_count++;
-        // printf("buffer count: %d\n", buffer_count);
-        pthread_mutex_unlock(&bufferMutex);
-        sem_post(&activityBuffer);
+        if (buffer_count == 99) {
+            sleep(5);
+        } else {
+            int data = readSensorialData();
+            int actuator = data % NUM_ACTUATORS;
+            // printf("actuator: %d\n", actuator);
+            pthread_mutex_lock(&bufferMutex);
+            buffer[buffer_count] = actuator;
+            // printf("actuator in array: %d\n", buffer[buffer_count]);
+            buffer_count++;
+            // printf("buffer count: %d\n", buffer_count);
+            pthread_mutex_unlock(&bufferMutex);
+            sem_post(&activityBuffer);
+        }
     }
 }
 
